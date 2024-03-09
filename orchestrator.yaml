@@ -1,0 +1,121 @@
+swagger: "2.0"
+info:
+  title: Orchestrator API
+  description: RESTful public-facing API.
+    The API is accessible through HTTP calls on specific URLs
+    carrying JSON modeled data.
+  version: 0.0.1
+  termsOfService: ""
+  contact:
+    email: "prakashecdrid@gmail.com"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+
+schemes:
+  - http
+consumes:
+  - application/json
+produces:
+  - application/json
+
+paths:
+  /:
+    get:
+      summary: Returns information about the orchestrator.
+      responses:
+        200:
+          description: The orchestrator information
+          schema:
+            $ref: "#/definitions/OrchestratorInfo"
+        default:
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/Error"
+  /events:
+    post:
+      summary: process and store the events emmited by orchestrator agent
+      parameters:
+        - name: info
+          in: body
+          schema:
+            $ref: "#/definitions/EventDetails"
+      responses:
+        200:
+          description: event process successfully
+        400:
+          description: event was not processed successfully
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/Error"
+  /healthz:
+    get:
+      summary: to perform healthcheck of the orchestrator
+      responses:
+        200:
+          description: orchestrator is up and accepting connection
+        default:
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/Error"
+definitions:
+  Error:
+    type: object
+    properties:
+      message:
+        type: string
+        description: A description of the error condition
+        readOnly: true
+  OrchestratorInfo:
+    type: object
+    description: Describes the orchestrator information
+    required:
+      - status
+      - memory
+      - vcpu
+      - host_vms
+    properties:
+      status:
+        description: orchestrator status
+        type: string
+        enum:
+          - Running
+          - Modifying
+          - Stopping
+      memory:
+        description: configured max memory for orchestrator
+        type: number
+      vcpu:
+        description: configured max vpcu for orchestrator
+        type: number
+      host_vms:
+        description: list of all the host vms orchestrator is managing
+        type: array
+        items:
+          type: string
+  EventDetails:
+    type: object
+    description: Describes the event object
+    required:
+      - type
+      - message
+      - host_id
+    properties:
+      type:
+        description: event type
+        type: string
+        enum:
+          - vm_stopped
+          - vm_killed
+          - oom
+      message:
+        description: event message
+      host_id:
+        description: host vm id from where the event generated
+        type: string
+      vm_id:
+        description: micro VM id assocaited with event
+        type: string

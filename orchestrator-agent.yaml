@@ -1,0 +1,190 @@
+swagger: "2.0"
+info:
+  title: Orchestrator Agent API
+  description: RESTful public-facing API.
+    The API is accessible through HTTP calls on specific URLs
+    carrying JSON modeled data.
+  version: 0.0.1
+  termsOfService: ""
+  contact:
+    email: "prakashecdrid@gmail.com"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+
+schemes:
+  - http
+consumes:
+  - application/json
+produces:
+  - application/json
+
+paths:
+  /:
+    get:
+      summary: Returns general information about the host VM instance.
+      responses:
+        200:
+          description: The instance information
+          schema:
+            $ref: "#/definitions/InstanceInfo"
+        default:
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/Error"
+  /vm:
+    put:
+      summary: Creates a micro vm via Firecracker API with the provided configuration
+      parameters:
+        - name: micro_vm_configuration
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/CreateMicroVMConfig"
+      responses:
+        200:
+          description: micro vm created successfully
+          schema:
+            $ref: "#/definitions/CreateMicroVMResponse"
+        400:
+          description: failed to provision micro vm due to bad input configuration
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/Error"
+  /vm/{id}:
+    get:
+      summary: Returns information about micro vm created by firecracker API.
+      parameters:
+        - name: id
+          type: string
+          in: path
+          required: true
+      responses:
+        200:
+          description: information about vmm
+          schema:
+            $ref: "#/definitions/VMMInfo"
+        default:
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/Error"
+    delete:
+      summary: deletes a micro vm via Firecracker API with the provided configuration
+      parameters:
+        - name: id
+          type: string
+          in: path
+          required: true
+      responses:
+        200:
+          description: micro vm created successfully
+          schema:
+            $ref: "#/definitions/CreateMicroVMResponse"
+        400:
+          description: failed to provision micro vm due to bad input configuration
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/Error"
+  /action/vm:
+    put:
+      summary: Performs an specific action on the micro vm running on the host
+      parameters:
+        - name: action_info
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/VmmActionInfo"
+      responses:
+        200:
+          description: the action was successful
+        400:
+          description: the action failed due to bad request
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/Error"
+definitions:
+  CreateMicroVMResponse:
+    type: object
+    properties:
+      id:
+        type: string
+  CreateMicroVMConfig:
+    type: object
+    properties:
+      memory:
+        type: integer
+      vCPU:
+        type: integer
+  VmmActionInfo:
+    type: object
+    properties:
+      action:
+        type: string
+        enum:
+          - start
+          - pause
+          - stop
+  Error:
+    type: object
+    properties:
+      message:
+        type: string
+        description: A description of the error condition
+        readOnly: true
+  VMMInfo:
+    type: object
+    description: Describes the vmm information
+    required:
+      - status
+      - used_memory_per
+      - used_cpu_per
+      - firecracker_version
+    properties:
+      status:
+        description: firecracker status
+        type: string
+        enum:
+          - Running
+          - Pasued
+          - Stopped
+      firecracker_version:
+        description: firecracker version
+        type: string
+      used_memory_per:
+        description: used memory in percentage
+        type: number
+      used_cpu_per:
+        description: used cpu in percentage
+        type: number
+  InstanceInfo:
+    type: object
+    description: Describes the host VM information
+    required:
+      - status
+      - used_memory_per
+      - used_cpu_per
+    properties:
+      status:
+        description: orchestrator agent status
+        type: string
+        enum:
+          - Running
+          - Modifying
+          - Stopping
+      used_memory_per:
+        description: used memory in percentage
+        type: number
+      used_cpu_per:
+        description: used cpu in percentage
+        type: number
+
+
