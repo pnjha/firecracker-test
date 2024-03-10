@@ -32,6 +32,22 @@ paths:
           description: Internal Server Error
           schema:
             $ref: "#/definitions/Error"
+  /register:
+    post:
+      summary: Registers the orchestrator agent with the main orchestrator
+      parameters:
+        - name: name
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/RegisterOrchestratorAgent"
+      responses:
+        200:
+          description: registeration completed successfully
+        default:
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/Error"
   /vm:
     put:
       summary: Creates a micro vm via Firecracker API with the provided configuration
@@ -112,6 +128,25 @@ paths:
           schema:
             $ref: "#/definitions/Error"
 definitions:
+  RegisterOrchestratorAgent:
+    type: object
+    required:
+      - orchestrator_endpoint
+      - orchestrator_username
+      - orchestrator_password
+    properties:
+      orchestrator_endpoint:
+        type: string
+        description: endpoint on which main orchestrator is running
+      orchestrator_username:
+        type: string
+        description: username for the basic authentication with main orchestrator
+      orchestrator_password:
+        type: string
+        description: password for the basic authentication with main orchestrator
+      event_push_interval:
+        type: number
+        description: interval at which agent will push the events to main orchestrator in seconds
   CreateMicroVMResponse:
     type: object
     properties:

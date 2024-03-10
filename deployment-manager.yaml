@@ -22,7 +22,7 @@ produces:
 paths:
   /healthz:
     get:
-      summary: to perform healthcheck of the orchestrator
+      summary: to perform healthcheck of the deployment manager
       responses:
         200:
           description: orchestrator is up and accepting connection
@@ -37,7 +37,7 @@ paths:
         - name: info
           in: body
           schema:
-            $ref: "#/definitions/VMDetails"
+            $ref: "#/definitions/VMConfiguration"
       responses:
         202:
           description: provision request validated and accepted
@@ -52,6 +52,26 @@ paths:
           schema:
             $ref: "#/definitions/Error"
   /vm/{id}:
+    get:
+      summary: get information about the host VM
+      parameters:
+        - name: id
+          type: string
+          in: path
+          required: true
+      responses:
+        202:
+          description: host vm information
+          schema:
+            $ref: "#/definitions/VMInformation"
+        404:
+          description: host vm with specified id not found
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/Error"
     patch:
       summary: updates the host VM
       parameters:
@@ -106,6 +126,43 @@ paths:
           schema:
             $ref: "#/definitions/OperationsStatusResponse"
 definitions:
+  VMInformation:
+    type: object
+    required:
+      - endpoint
+      - username
+      - password
+      - ssh_key
+      - status
+      - memory
+      - vcpu
+    properties:
+      endpoint:
+        type: string
+        description: hostname or IP of the VM instance
+      username:
+        type: string
+        description: admin username for the login into the vm
+      password:
+        type: string
+        description: admin password for the login into the vm
+      ssh_key:
+        type: string
+        description: private ssh key for starting the ssh session
+      status:
+        type: string
+        description: state of the VM
+        enum:
+          - Running
+          - Stopped
+          - Modifying
+          - Restarting
+      memory:
+        type: number
+        description: max memory configured for the vm in bytes
+      vcpu:
+        type: number
+        description: max vcpu configured for the vm
   PatchVMDetails:
     type: object
     required:
@@ -118,7 +175,7 @@ definitions:
       vcpu:
         type: number
         description: vcpu count
-  VMDetails:
+  VMConfiguration:
     type: object
     required:
       - memory
