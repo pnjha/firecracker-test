@@ -61,7 +61,43 @@ paths:
           description: Internal Server Error
           schema:
             $ref: "#/definitions/Error"
+  /servers:
+    get:
+      summary: to get the list of all active micro VM
+      responses:
+        200:
+          description: returns the list of all the micro vms
+          schema:
+            $ref: "#/definitions/ServerList"
+        default:
+          description: Internal server error
+          schema:
+            $ref: "#/definitions/Error"
 definitions:
+  ServerList:
+    type: object
+    required:
+      - servers
+    properties:
+      servers:
+        description: array of all the server objects
+        type: array
+        items:
+          type: object
+          required:
+            - endpoint
+            - status
+          properties:
+            endpoint:
+              description: micro vm endpoint
+              type: string
+            status:
+              description: vm status
+              type: string
+              enum:
+                - Running
+                - Updating
+                - Stopped
   Error:
     type: object
     properties:
